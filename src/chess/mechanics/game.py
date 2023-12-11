@@ -4,10 +4,16 @@ from os.path import abspath, dirname
 
 # Get the current directory of the file
 currentDir = dirname(abspath(__file__))
-
+parentDir = dirname(currentDir)
+parentParentDir = dirname(parentDir)
+pppDir = dirname(parentParentDir)
 sys.path.append(currentDir)
-import pieces
+sys.path.append(parentDir)
+sys.path.append(parentParentDir)
+sys.path.append(pppDir)
 
+import pieces
+from ai.ai import Computer, chess
 
 class Game:
     def __init__(self):
@@ -68,8 +74,8 @@ class Game:
                         "side" : None
                     }
 
-        """self.roundLabel = RoundWidget()"""
-    
+
+
         for row in self.xCoordinates:
             for col in  self.yCoordinates:
                 coordinate = row + col
@@ -81,6 +87,8 @@ class Game:
 
         ##Setting the Pieces on the start
         self.setStartPiece()
+
+        self.computer = Computer()
 
     def setStartPiece(self):
         # Set up the initial pieces on the board
@@ -340,3 +348,19 @@ class Game:
         
         if finish == True:
             self.winner = self.round
+
+    def uciToMove(self, notation):
+        notation = notation.uci()
+        for piece in self.whitePieces:
+            if piece.coordinate == notation[0] + notation[1]:
+                coordinate = notation[2] + notation[3]
+                piece = piece
+                oldCoordinate = piece.coordinate
+                coordinateList = None
+                return coordinate, piece, oldCoordinate, coordinateList
+
+    def computerMove(self):
+        bestMove = self.computer.predict_best_move()
+        coordinate, piece , oldCoordinate, coordinateList = self.uciToMove(bestMove)
+        self.move(coordinate, piece, oldCoordinate, coordinateList)
+        self.computer.pushMove(bestMove.uci())

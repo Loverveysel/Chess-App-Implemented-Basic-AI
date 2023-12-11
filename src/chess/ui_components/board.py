@@ -50,6 +50,8 @@ class Board(QWidget):
         self.setFixedSize(self.squareSize * 8, self.squareSize * 8)
         self.setLayout(self.layout)
 
+        self.Game.computerMove()
+
         # Connect the click event and set piece icons
         self.clickEvent()
         self.setIcons()
@@ -103,6 +105,7 @@ class Board(QWidget):
     def secondClickFunc(self, coordinate, piece, oldCoordinate, coordinateList):
         # Handle logic for the second click event
         self.Game.move(coordinate, piece, oldCoordinate, coordinateList)
+        self.Game.computer.pushMove(oldCoordinate + coordinate)
         
         for coor in coordinateList:
             self.squares[coor]["button"].setText(self.Game.board[coor]["coordinate"])
@@ -117,8 +120,17 @@ class Board(QWidget):
             label = QLabel("Winner : " + self.Game.winner)
             self.layout.addWidget(label)
         
-        print(self.Game.winner)
-
+        self.Game.computerMove()
+        
+        self.clickEvent()
+        self.setIcons()
+        
+        if self.Game.winner:
+            self.clearLayout()
+            label = QLabel("Winner : " + self.Game.winner)
+            self.layout.addWidget(label)
+        
+        
     def setIcons(self):
         # Set piece icons on the board
         for row in self.Game.xCoordinates:
